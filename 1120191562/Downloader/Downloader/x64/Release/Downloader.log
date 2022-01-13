@@ -1,0 +1,18 @@
+﻿  downloadFile.cpp
+  downloadThread.cpp
+  manager.cpp
+  test.cpp
+E:\GitHub\downloaderK\1120191562\Downloader\Downloader\test.cpp(57,38): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+E:\GitHub\downloaderK\1120191562\Downloader\Downloader\test.cpp(62,11): warning C4473: “scanf_s”: 没有为格式字符串传递足够的参数
+E:\GitHub\downloaderK\1120191562\Downloader\Downloader\test.cpp(62,11): message : 占位符和其参数预计 2 可变参数，但提供的却是 1 参数
+E:\GitHub\downloaderK\1120191562\Downloader\Downloader\test.cpp(62,11): message : 缺失的可变参数 2 为格式字符串“%s”所需
+E:\GitHub\downloaderK\1120191562\Downloader\Downloader\test.cpp(62,11): message : 此参数用作缓冲区大小
+E:\GitHub\downloaderK\1120191562\Downloader\Downloader\test.cpp(65,11): warning C4473: “scanf_s”: 没有为格式字符串传递足够的参数
+E:\GitHub\downloaderK\1120191562\Downloader\Downloader\test.cpp(65,11): message : 占位符和其参数预计 2 可变参数，但提供的却是 1 参数
+E:\GitHub\downloaderK\1120191562\Downloader\Downloader\test.cpp(65,11): message : 缺失的可变参数 2 为格式字符串“%s”所需
+E:\GitHub\downloaderK\1120191562\Downloader\Downloader\test.cpp(65,11): message : 此参数用作缓冲区大小
+  正在生成代码
+  Previous IPDB not found, fall back to full compilation.
+  All 112 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  已完成代码的生成
+  Downloader.vcxproj -> E:\GitHub\downloaderK\1120191562\Downloader\x64\Release\Downloader.exe
