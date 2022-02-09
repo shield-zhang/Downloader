@@ -1,42 +1,64 @@
 package downloadCore;
 
+
 import downloadUtil.Http;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.util.concurrent.Callable;
 
-public class Downloader {
-    /**
-     * @param url      下载链接
-     * @param FileName 文件名，默认保存在下载器当前地址
-     */
-    public void download(String url, String FileName) {
+public class Downloader implements Callable<Boolean>  {
+    private long beginSite;
+    private long endSite;
+    private int num;
+    public Downloader(long beginSite, long endSite,int num)
+
+    {
+        this.beginSite=beginSite;
+        this.endSite=endSite;
+        this.num=num;
+    }
+
+    @Override
+    public Boolean call() throws Exception {
         HttpURLConnection httpURLConnection = null;
+        String tempFileName=DownloadInfo.fileName+".temp"+num;
         try {
-            httpURLConnection = Http.getHttpURLConnection(url);//根据url建立httpURLConnection
+            httpURLConnection = Http.getHttpURLConnection(beginSite,endSite);//建立httpURLConnection
         } catch (IOException e) {
             e.printStackTrace();
         }
         try (
                 //利用IO流
                 InputStream inputStream = httpURLConnection.getInputStream();
-                BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-                FileOutputStream fileOutputStream = new FileOutputStream(FileName);
-                BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+                BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);//读入内存
+                RandomAccessFile randomAccessFile=new RandomAccessFile(tempFileName,"rw");
+
         ) {
-            int len=-1;
-            while ((len=bufferedInputStream.read())!=-1){
-                bufferedOutputStream.write(len);
+            System.out.println(num+"号线程，文件开始下载！");
+            byte[] buffer=new  byte[1024];
+            int len = -1;
+            while ((len = bufferedInputStream.read(buffer)) != -1) {
+                randomAccessFile.write(buffer,0,len);
             }
+            System.out.println(num+"号线程，文件下载完毕！");
+            return true;
         } catch (FileNotFoundException e) {
-            System.out.println("要下载的文件不存在");
+            System.out.println(num+"号线程，找不到所要下载文件！");
+            return false;
         } catch (Exception e) {
-            System.out.println("文件下载失败");
+            System.out.println(num+"号线程，文件下载失败！");
+            return false;
         } finally {
+            //链接对象关闭
             if (httpURLConnection != null) {
                 httpURLConnection.disconnect();
             }
+            return false;
         }
+    }
+
 
     }
-}
+
+
