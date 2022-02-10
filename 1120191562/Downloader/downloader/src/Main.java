@@ -1,8 +1,5 @@
 import downloadCore.DownloadControl;
 import downloadCore.DownloadInfo;
-import downloadCore.Downloader;
-
-import java.io.File;
 import java.util.Scanner;
 
 public class Main {

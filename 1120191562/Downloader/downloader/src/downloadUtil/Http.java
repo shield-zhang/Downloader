@@ -10,11 +10,6 @@ import java.net.URLConnection;
 public class Http {
     /**
      * 获取每个分块的HttpURLConnection
-     * @param url 下载链接
-     * @param beginSite 分块始位置
-     * @param endSite 分块结束位置
-     * @return
-     * @throws IOException
      */
     public static HttpURLConnection getHttpURLConnection(long beginSite,long endSite) throws IOException {
         HttpURLConnection httpURLConnection=getHttpURLConnection();
@@ -29,8 +24,6 @@ public class Http {
     }
     /**
      * 将下载链接转换为HttpURLConnection
-     * @return
-     * @throws
      */
     public static HttpURLConnection getHttpURLConnection() throws IOException {
         URL url = new URL(DownloadInfo.url);

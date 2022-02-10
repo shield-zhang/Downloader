@@ -7,7 +7,6 @@ import java.net.HttpURLConnection;
 
 public class DownloadInfo {
     public static int threadNum;//线程数
-    public static int FileSize;//文件总大小
     public static int everySize;//每个线程负责的文件块大小
     public static String url;//下载链接
     public static String savePath;//文件保存路径
