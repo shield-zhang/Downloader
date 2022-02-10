@@ -6,17 +6,20 @@ import downloadUtil.Http;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 
 public class Downloader implements Callable<Boolean>  {
     private long beginSite;
     private long endSite;
     private int num;
-    public Downloader(long beginSite, long endSite,int num)
+    private CountDownLatch countDownLatch;
+    public Downloader(CountDownLatch countDownLatch,long beginSite, long endSite,int num)
 
     {
         this.beginSite=beginSite;
         this.endSite=endSite;
         this.num=num;
+        this.countDownLatch=countDownLatch;
     }
 
     @Override
@@ -36,7 +39,7 @@ public class Downloader implements Callable<Boolean>  {
 
         ) {
             System.out.println(num+"号线程，文件开始下载！");
-            byte[] buffer=new  byte[1024];
+            byte[] buffer=new  byte[DownloadInfo.BYTE_SIZE];
             int len = -1;
             while ((len = bufferedInputStream.read(buffer)) != -1) {
                 randomAccessFile.write(buffer,0,len);
@@ -50,6 +53,7 @@ public class Downloader implements Callable<Boolean>  {
             System.out.println(num+"号线程，文件下载失败！");
             return false;
         } finally {
+            countDownLatch.countDown();
             //链接对象关闭
             if (httpURLConnection != null) {
                 httpURLConnection.disconnect();
@@ -57,7 +61,6 @@ public class Downloader implements Callable<Boolean>  {
             return false;
         }
     }
-
 
     }
 

@@ -12,6 +12,7 @@ public class DownloadInfo {
     public static String url;//下载链接
     public static String savePath;//文件保存路径
     public static String fileName;//文件名
+    public static final int BYTE_SIZE = 1024 * 100;
 
     public static void set(String url, String savePath, int threadNum) {
         System.out.println("进入DownloadInfo.set");
