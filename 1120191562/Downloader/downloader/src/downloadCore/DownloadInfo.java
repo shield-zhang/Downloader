@@ -30,7 +30,7 @@ public class DownloadInfo {
         HttpURLConnection httpURLConnection = null;
         try {
             //获取下载文件的大小
-            httpURLConnection = Http.getHttpURLConnection();
+            httpURLConnection = Http.getHttpURLConnection(DownloadInfo.url);
             FileSize = httpURLConnection.getContentLength();
 
             //计算切分后的文件大小

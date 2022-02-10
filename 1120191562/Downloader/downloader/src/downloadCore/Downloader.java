@@ -7,7 +7,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
-
+//record作为Downloader的顶级类
 public record Downloader(CountDownLatch countDownLatch, long beginSite, long endSite,
                          int num) implements Callable<Boolean> {
 

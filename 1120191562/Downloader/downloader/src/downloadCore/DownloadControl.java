@@ -7,6 +7,7 @@ import java.io.*;
 import java.util.concurrent.*;
 
 public class DownloadControl {
+    //CountDownLatch用于使线程同步
     private final CountDownLatch countDownLatch=new CountDownLatch(DownloadInfo.threadNum);
     public void run(){
         //采用线程池的方式
