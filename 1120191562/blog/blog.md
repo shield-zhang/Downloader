@@ -74,15 +74,19 @@
 
 下载qq.exe，使用8线程，保存在E:\save
 
-![image-20220210184158984](E:\GitHub\downloaderK\1120191562\blog\image\第一阶段性能测试1.png)
+![image-20220210184158984](.\image\第一阶段\第一阶段性能测试1.png)
 
-![image-20220210184223304](E:\GitHub\downloaderK\1120191562\blog\image\第一阶段性能测试2.png)
+![image-20220210184223304](.\image\第一阶段\第一阶段性能测试2.png)
 
-![image-20220210184250324](E:\GitHub\downloaderK\1120191562\blog\image\第一阶段性能测试3.png)
+![image-20220210184250324](.\image\第一阶段\第一阶段性能测试3.png)
 
-![image-20220210185604296](E:\GitHub\downloaderK\1120191562\blog\image\第一阶段性能测试4.png)
+![image-20220210185604296](.\image\第一阶段\第一阶段性能测试4.png)
 
-根据结果进行分析，消耗最大的函数是类Downloader里的call()函数，因为它负责具体的下载任务。
+![image-20220210232741493](.\image\第一阶段\第一阶段性能测试5.png)
+
+
+
+根据结果进行分析，消耗最大的函数是类DownloadControl里的run函数，因为它负责全局的调控。
 
 ## 六、代码说明
 
