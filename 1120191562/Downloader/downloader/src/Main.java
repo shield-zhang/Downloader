@@ -1,5 +1,4 @@
 import downloadCore.DownloadControl;
-import downloadCore.DownloadInfo;
 import downloadUtil.IfLegal;
 
 import java.util.Scanner;
@@ -35,10 +34,9 @@ public class Main {
                 System.out.println("线程数目非法，请重新输入！");
                 threadNum = scanner.nextInt();
             }
-            DownloadInfo.set(url, savePath, threadNum);
-            System.out.println(DownloadInfo.threadNum);
+
             DownloadControl downloadControl = new DownloadControl();
-            downloadControl.run();
+            downloadControl.run(url,savePath,threadNum);
             //阻塞
             System.out.println("输入1继续，输入0退出程序：");
 

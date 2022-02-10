@@ -52,6 +52,6 @@ public class IfLegal {
      * @return 合法TRUE，非法false
      */
     public static boolean ifLegalThreadNum(int threadNum) {
-        return threadNum > 0 && threadNum < 32;
+        return threadNum > 0 && threadNum <= 32;
     }
 }

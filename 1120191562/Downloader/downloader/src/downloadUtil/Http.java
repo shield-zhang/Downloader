@@ -1,7 +1,5 @@
 package downloadUtil;
 
-import downloadCore.DownloadInfo;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -11,8 +9,8 @@ public class Http {
     /**
      * 获取每个分块的HttpURLConnection
      */
-    public static HttpURLConnection getHttpURLConnection(long beginSite,long endSite) throws IOException {
-        HttpURLConnection httpURLConnection=getHttpURLConnection(DownloadInfo.url);
+    public static HttpURLConnection getHttpURLConnection(String url,long beginSite,long endSite) throws IOException {
+        HttpURLConnection httpURLConnection=getHttpURLConnection(url);
         if (endSite!=-1){
             httpURLConnection.setRequestProperty("RANGE","bytes="+beginSite+"-"+endSite);
         }else {

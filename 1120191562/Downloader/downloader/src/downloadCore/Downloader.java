@@ -8,15 +8,17 @@ import java.net.HttpURLConnection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 //record作为Downloader的顶级类
-public record Downloader(CountDownLatch countDownLatch, long beginSite, long endSite,
+public record Downloader(String fileName,String url,CountDownLatch countDownLatch, long beginSite, long endSite,
                          int num) implements Callable<Boolean> {
 
     @Override
     public Boolean call() {
+
         HttpURLConnection httpURLConnection = null;
-        String tempFileName = DownloadInfo.fileName + ".temp" + num;
+        //临时文件名
+        String tempFileName = fileName + ".temp" + num;
         try {
-            httpURLConnection = Http.getHttpURLConnection(beginSite, endSite);//建立httpURLConnection
+            httpURLConnection = Http.getHttpURLConnection(url,beginSite, endSite);//建立httpURLConnection
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -30,7 +32,7 @@ public record Downloader(CountDownLatch countDownLatch, long beginSite, long end
 
             ) {
                 System.out.println(num + "号线程，文件开始下载！");
-                byte[] buffer = new byte[DownloadInfo.BYTE_SIZE];
+                byte[] buffer = new byte[DownloadInfo.Byte_Size];
                 int len;
                 while ((len = bufferedInputStream.read(buffer)) != -1) {
                     randomAccessFile.write(buffer, 0, len);
