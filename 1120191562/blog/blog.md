@@ -1,3 +1,5 @@
+
+
 # 个人项目-并发文件下载助手
 
 ## 零、任务
@@ -19,7 +21,20 @@
 ```
 
 注意：并不是所有网站都支持多线程并发下载，需要先进行检测。
+### 第2阶段 实现批量多协议文件下载功能
 
+指定下载地址时
+
+- 可以在参数中指定多个要下载的文件地址，即允许使用多个url参数
+- 可以将这些地址放入一个文本文件中，指定从该文件中读取。参数
+
+```
+--input filename, -i filename filename with multiple URL
+```
+
+- 支持使用正则表达式来生成多个下载地址，
+
+同时，除支持http/https协议外，也能够支持如ftp, bittorrent，磁力链等。
 ## 二、PSP表格： 
 
 ### 第1阶段 实现单个文件的下载功能
@@ -42,6 +57,26 @@
 | · Postmortem & Process Improvement Plan | · 事后总结, 并提出过程改进计划 | 30 | 10 |
 |  | 合计 | 1050 | 2200 |
 
+### 第2阶段 实现单个文件的下载功能
+| PSP2.1 | Personal Software Process Stages | 预估耗时（分钟） | 实际耗时（分钟） |
+| --- | --- | --- | --- |
+| Planning | 计划 | 10             |                |
+| · Estimate | · 估计这个任务需要多少时间 | 700              |          |
+| Development | 开发 | 550 |  |
+| · Analysis | · 需求分析 (包括学习新技术) | 100 |  |
+| · Design Spec | · 生成设计文档 | 50 |  |
+| · Design Review | · 设计复审 (和同事审核设计文档) | 10 |  |
+| · Coding Standard | · 代码规范 (为目前的开发制定合适的规范) | 10 |  |
+| · Design | · 具体设计 | 30 |  |
+| · Coding | · 具体编码 | 250 |  |
+| · Code Review | · 代码复审 | 30 |  |
+| · Test | · 测试（自我测试，修改代码，提交修改） | 70 |  |
+| Reporting | 报告 | 150              |  |
+| · Test Report | · 测试报告 | 120 |  |
+| · Size Measurement | · 计算工作量 | 10 |  |
+| · Postmortem & Process Improvement Plan | · 事后总结, 并提出过程改进计划 | 20               |  |
+|  | 合计 | 700 |  |
+
 ```
 
 ```
@@ -55,6 +90,16 @@
 大体思路是根据url，获取下载文件的大小。然后根据线程数目，算出来每个线程所要下载的文件块大小。当每个线程负责的文件块下载完毕后，对所有文件按照次序进行合并，最后清除临时文件。
 
 主要用到java中的多线程（线程池），http，IO流，file等方面的知识，主要参考java官方文档和各类博客。
+
+### 第2阶段 实现批量多协议文件下载功能
+
+第二阶段主要任务是从文本中获取各类下载链接。
+
+主要思路是，新建一个类，专门从输入中获取下载的url，其下应该包含三个方法：
+
+get
+
+
 
 ## 四、设计实现过程
 
@@ -396,7 +441,7 @@ public record Downloader(String fileName,String url,CountDownLatch countDownLatc
 
 主要判断输入的合法性。即URL，保存路径，线程数是否合法。
 
-```
+```java
 public class IfLegal {
     /**
      * URL是否合法
