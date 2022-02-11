@@ -60,22 +60,22 @@
 ### 第2阶段 实现单个文件的下载功能
 | PSP2.1 | Personal Software Process Stages | 预估耗时（分钟） | 实际耗时（分钟） |
 | --- | --- | --- | --- |
-| Planning | 计划 | 10             |                |
-| · Estimate | · 估计这个任务需要多少时间 | 700              |          |
-| Development | 开发 | 550 |  |
-| · Analysis | · 需求分析 (包括学习新技术) | 100 |  |
-| · Design Spec | · 生成设计文档 | 50 |  |
-| · Design Review | · 设计复审 (和同事审核设计文档) | 10 |  |
-| · Coding Standard | · 代码规范 (为目前的开发制定合适的规范) | 10 |  |
-| · Design | · 具体设计 | 30 |  |
-| · Coding | · 具体编码 | 250 |  |
-| · Code Review | · 代码复审 | 30 |  |
-| · Test | · 测试（自我测试，修改代码，提交修改） | 70 |  |
-| Reporting | 报告 | 150              |  |
-| · Test Report | · 测试报告 | 120 |  |
-| · Size Measurement | · 计算工作量 | 10 |  |
-| · Postmortem & Process Improvement Plan | · 事后总结, 并提出过程改进计划 | 20               |  |
-|  | 合计 | 700 |  |
+| Planning | 计划 | 10             | 10 |
+| · Estimate | · 估计这个任务需要多少时间 | 700             | 600              |
+| Development | 开发 | 550 | 500 |
+| · Analysis | · 需求分析 (包括学习新技术) | 100 | 150 |
+| · Design Spec | · 生成设计文档 | 50 | 30 |
+| · Design Review | · 设计复审 (和同事审核设计文档) | 10 | 10 |
+| · Coding Standard | · 代码规范 (为目前的开发制定合适的规范) | 10 | 10 |
+| · Design | · 具体设计 | 30 | 20 |
+| · Coding | · 具体编码 | 250 | 180 |
+| · Code Review | · 代码复审 | 30 | 20 |
+| · Test | · 测试（自我测试，修改代码，提交修改） | 70 | 100 |
+| Reporting | 报告 | 150              | 100 |
+| · Test Report | · 测试报告 | 120 | 60 |
+| · Size Measurement | · 计算工作量 | 10 | 10 |
+| · Postmortem & Process Improvement Plan | · 事后总结, 并提出过程改进计划 | 20               | 30 |
+|  | 合计 | 700 | 600 |
 
 ```
 
@@ -95,15 +95,31 @@
 
 第二阶段主要任务是从文本中获取各类下载链接。
 
-主要思路是，新建一个类，专门从输入中获取下载的url，其下应该包含三个方法：
+主要思路是，新建一个类UrlReader，专门从输入中获取下载的url。并将获取到的url保存为https的链接形式，保存在一个私有属性String[] urls 中。类UrlReader其下应该包含三个方法：
 
-get
+#### getFromVariableUrls(String urls)
+
+从输入的参数中获取url。输入的参数为一个字符串，不同的链接之间用空格分开，利用split函数分割后，保存在私有属性String[] urls 中。
+
+#### getFromFileUrls(String fileName)
+
+根据文件内容获取url。输入的参数保存有下载链接的文本文档，每行为一个下载链接。采用IO流的方式，利用Scanner类读取文件，利用其中的hasNextLine()和nextLine()方法，将其保存在私有属性String[] urls 中。
+
+#### getFromRegexUrl(String urls，int start, int end)
+
+根据正则表达式获取Url，用“{}”表示url中可以被替换的部分。 start和end表示批量下载链接中有规律连续的部分的头尾。
+
+另外，再根据需要，对Main函数做出相应修改。
+
+#### 单元测试设计：
+
+根据每个函数的特点，设计相应的单元测试。详见 [软件测试.md](
 
 
 
 ## 四、设计实现过程
 
-详见分析设计文档。
+### 详见[分析设计文档](分析设计文档.md)。
 
 ## 五、性能分析
 
@@ -132,6 +148,20 @@ get
 
 
 根据结果进行分析，消耗最大的函数是类DownloadControl里的run函数，因为它负责全局的调控。
+
+
+
+### 第2阶段 实现批量多协议文件下载功能
+
+#### 使用jprofiler性能分析结果如下:
+
+![image-20220211185021618](E:\GitHub\downloaderK\1120191562\blog\image\2\性能分析\1.png)
+
+![image-20220211185142551](E:\GitHub\downloaderK\1120191562\blog\image\2\性能分析\2.png)
+
+![image-20220211185444011](E:\GitHub\downloaderK\1120191562\blog\image\2\性能分析\3.png)
+
+可见，新增类的性能优良。在随后的测试过程中又调整了相应的函数，优化了性能。
 
 ## 六、代码说明
 
@@ -487,6 +517,242 @@ public class IfLegal {
      */
     public static boolean ifLegalThreadNum(int threadNum) {
         return threadNum > 0 && threadNum < 32;
+    }
+}
+```
+
+### 第2阶段 实现单个文件的下载功能
+
+第二阶段主要任务是从文本中获取各类下载链接。
+
+主要思路是，新建一个类UrlReader，专门从输入中获取下载的url。并将获取到的url保存为https的链接形式，保存在一个私有属性String[] urls 中。类UrlReader其下应该包含三个方法：
+
+**getFromVariableUrls(String urls)**
+
+从输入的参数中获取url。输入的参数为一个字符串，不同的链接之间用空格分开，利用split函数分割后，保存在私有属性String[] urls 中。
+
+**getFromFileUrls(String fileName)**
+
+根据文件内容获取url。输入的参数保存有下载链接的文本文档，每行为一个下载链接。采用IO流的方式，利用Scanner类读取文件，利用其中的hasNextLine()和nextLine()方法，将其保存在私有属性String[] urls 中。
+
+**getFromRegexUrl(String urls，int start, int end)**
+
+根据正则表达式获取Url，用“{}”表示url中可以被替换的部分。 start和end表示批量下载链接中有规律连续的部分的头尾。
+
+另外，再根据需要，对Main函数做出相应修改。
+
+#### 类UrlReader
+
+```java
+public class UrlReader {
+    private String[] urlArray;
+    public String[] getUrlArray() {
+        return urlArray;
+    }
+
+    /**
+     * 根据参数获取url
+     * @param urls urls，中间用“ ”隔开
+     */
+    public void getFromVariableUrls(String urls){
+        urlArray=urls.split(" ");
+    }
+
+    /**
+     * 根据文件获取url
+     * @param fileName 文件名
+     */
+    public void getFromFileUrls(String fileName){
+
+        try (Scanner scanner = new Scanner(new FileReader(fileName))) {
+            int index=0;
+            StringBuilder tempStr= new StringBuilder();
+            while (scanner.hasNextLine()){
+                tempStr.append(scanner.nextLine()).append(" ");
+                urlArray= tempStr.toString().split(" ");
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("文件不能找到");
+            e.printStackTrace();
+
+        }
+    }
+
+    /**
+     * 根据正则表达式获取url
+     * @param url url
+     * @param start 起始数字
+     * @param end 结束数字
+     */
+    public void getFromRegexUrl(String url,int start, int end){
+        String[] tempUlrs=new String[end-start+1];
+        for (int i = 0; i < end -start+1; i++) {
+            tempUlrs[i]=url;
+          tempUlrs[i]= String.format(tempUlrs[i].replace("{}","%s"),Integer.toString(i+start) );
+        }
+      urlArray=tempUlrs;
+    }
+}
+```
+
+#### 类Main
+
+```java
+public class Main {
+    public static void main(String[] args) {
+
+        Scanner scanner = new Scanner(System.in);
+        String url;
+        String savePath;
+        int threadNum;
+        boolean flag = true;
+
+
+        while (flag) {
+
+
+            String temp;
+
+            while (true) {
+                //选择路径
+                System.out.println("输入1保存路径为默认地址（即当前地址），输入2为自定义地址：");
+                temp = scanner.next();
+                scanner.nextLine();
+
+                if (Objects.equals(temp, "1")) {
+                    System.out.println("保存路径为默认地址： " + System.getProperty("user.dir"));
+                    savePath = System.getProperty("user.dir");
+                    break;
+
+                } else if(Objects.equals(temp, "2")) {
+                    System.out.println("请输入文件保存地址：");
+                    savePath = scanner.next();
+                    scanner.nextLine();
+                    while (!IfLegal.ifLegalSavePath(savePath)) {
+                        System.out.println("该路径不存在，请重新输入！");
+                        savePath = scanner.next();
+                        scanner.nextLine();
+                    }
+                    break;
+                }else {
+                    System.out.println("请重新输入！");
+                }
+            }
+            while (true) {
+                //选择线程数
+                System.out.println("输入1为默认线程（即8线程），输入2选择自定义线程数(1~32)：");
+                temp = scanner.next();
+                scanner.nextLine();
+                if (Objects.equals(temp, "1")) {
+                    System.out.println("您选择了8线程下载！");
+                    threadNum = 8;
+                    break;
+                } else if (Objects.equals(temp, "2")) {
+                    System.out.println("请输入线程数（1~32）：");
+
+                    threadNum = scanner.nextInt();
+                    scanner.nextLine();
+                    while (!IfLegal.ifLegalThreadNum(threadNum)) {
+                        System.out.println("线程数目非法，请重新输入！");
+                        threadNum = scanner.nextInt();
+                        scanner.nextLine();
+                    }
+                    break;
+                } else {
+                    System.out.println("请重新输入！");
+                }
+            }
+            while (true) {
+                System.out.println("请输入1~3，选择下载方式：");
+                System.out.println("1、可以在参数中指定多个要下载的文件地址，即允许使用多个url参数");
+                System.out.println("2、可以将这些地址放入一个文本文件中，指定从该文件中读取。参数");
+                System.out.println("3、支持使用正则表达式来生成多个下载地址");
+                System.out.println("4、输入单个下载链接进行下载");
+                String choose;//选择下载模式
+                choose = scanner.next();
+                scanner.nextLine();
+                if (Objects.equals(choose, "4")) {
+                    System.out.println("您选择了模式4");
+                    //单个链接下载
+                    System.out.println("请输入文件下载链接：");
+                    url = scanner.next();
+                    scanner.nextLine();
+                    while (!IfLegal.ifLegalURL(url)) {
+                        System.out.println("该链接无法访问，请重新输入:");
+                        url = scanner.next();
+                        scanner.nextLine();
+                    }
+                    DownloadControl downloadControl = new DownloadControl();
+                    downloadControl.run(url, savePath, threadNum);
+                    break;
+
+                } else if (Objects.equals(choose, "1") || Objects.equals(choose, "2") || Objects.equals(choose, "3")) {
+
+                    UrlReader urlReader = new UrlReader();
+                    String tempStr;
+                    if (choose.equals("1")) {
+                        System.out.println("您选择了模式1");
+                        System.out.println("请输入多个链接，中间用空格隔开，批量下载");
+                        tempStr = scanner.nextLine();
+                        urlReader.getFromVariableUrls(tempStr);
+                    } else if (choose.equals("2")) {
+                        System.out.println("您选择了模式2");
+
+                        System.out.println("请输入文本文件(每行一个链接)的地址，批量下载");
+                        tempStr = scanner.next();
+                        scanner.nextLine();
+                        while (!IfLegal.ifLegalSavePath(savePath)) {
+                            System.out.println("该路径不存在，请重新输入！");
+                            tempStr = scanner.next();
+                            scanner.nextLine();
+                        }
+                        urlReader.getFromFileUrls(tempStr);
+                    } else {
+                        System.out.println("您选择了模式3");
+                        System.out.println("使用正则表达式来生成多个下载地址，输入方式如http://www.aaa{}.com,{}为替换部分");
+                        System.out.println("输入正则表达式");
+                        tempStr = scanner.next();
+                        scanner.nextLine();
+                        int start, end;
+                        System.out.println("输入start");
+                        start = scanner.nextInt();
+                        System.out.println("输入end");
+                        end = scanner.nextInt();
+                        urlReader.getFromRegexUrl(tempStr, start, end);
+                    }
+
+
+                    //获得url数组
+                    String[] urls = urlReader.getUrlArray();
+                    for (int i = 0; i < urls.length; i++) {
+                        System.out.println(urls[i]);
+                        if (!IfLegal.ifLegalURL(urls[i])) {
+                            System.out.println(urls[i] + "无法访问,请重新输入:");
+                            flag = false;
+                            break;
+                        }
+                    }
+
+
+                    if (flag) {
+                        for (int i = 0; i < urls.length; i++) {
+                            DownloadControl downloadControl = new DownloadControl();
+                            downloadControl.run(urls[i], savePath, threadNum);
+                        }
+
+                    }
+
+                    break;
+                } else {
+                    System.out.println("输入错误，重新输入");
+                }
+            }
+            System.out.println("输入1继续，输入0退出程序：");
+            if (scanner.nextInt() != 1) {
+                flag = false;
+            }
+
+        }
     }
 }
 ```

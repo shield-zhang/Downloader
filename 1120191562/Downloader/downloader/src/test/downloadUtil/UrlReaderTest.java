@@ -35,7 +35,7 @@ class UrlReaderTest {
         Assertions.assertEquals("https://www.baidu.com/0", urls[0]);
         Assertions.assertEquals("https://www.baidu.com/1", urls[1]);
         Assertions.assertEquals("https://www.baidu.com/2", urls[2]);
-
+        urlReader.getFromFileUrls("wedadadaassa");
     }
 
     @Test
