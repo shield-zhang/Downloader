@@ -41,6 +41,8 @@ public class DownloadControl {
         //合并文件
         mergeTemp(fileName,threadNum);
         clearTemp(fileName,threadNum);
+        System.out.println(url+"下载完毕！");
+
         //关闭线程池
        threadPoolExecutor.shutdown();
 
