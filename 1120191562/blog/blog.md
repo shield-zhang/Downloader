@@ -146,17 +146,51 @@
 
 ### 第3阶段 用户界面
 
-第3阶段界面初步设计如下
+#### 第3阶段界面初步设计如下
+
+在界面设计阶段，我准备使用swing GUI进行设计。使用了JFormDesigner插件辅助设计工作。
 
 ![](E:\GitHub\downloaderK\1120191562\blog\image\3\界面\1.png)
 
 打开项目后，会自动获取剪切板内容到 “本地文件名或者url” 中，根据剪切板中的内容，选择不同的下载按钮。同时，可显示当前的下载状态（完成？失败？正在下载？）。
 
-输入文件保存地址和线程数目，可以点击保存，这样再次打开项目时还会保存当前设置。
+输入文件保存地址和线程数目，可以点击保存，这样再次打开项目时还会保存当前设置。保存设置时，在项目中建立一个settings.txt文件。每次打开时从文件中读出保存地址和线程数；保存设置时，再将保存地址和线程数写入文件。
 
-关于自动获取剪切板内容，可以新建一个类，ClipboardGet，应该有方法getClipboard。
+输入参数，开始下载后，会显示下载状态。
 
-保存设置时，在项目中建立一个txt文件，利用文件读写，每次打开时从文件中读出保存地址和线程数；保存设置时，再将保存地址和线程数写入文件。
+##### GetClipboard
+
+关于自动获取剪切板内容，可以新建一个类，GetClipboard，应该有方法getClipboard。该方法自动获取剪切板内容，并判断是否为字符串。如果为字符串，则将其获取到文本框里。
+
+此外，需根据不同的按钮设置鼠标监听。
+
+输入参数有：
+
+1、文件保存地址（可保存）
+
+2、线程数（可保存）
+
+3、单个URL，多个URL(用空格隔开)，或本地链接
+
+4、正则表达式形式的URL，起始编号start，最终编号end。
+
+#### 单元测试设计：
+
+根据每个函数的特点，设计相应的单元测试。详见 [软件测试.md](软件测试.md)
+
+#### 第3阶段最终界面设计如下:
+
+在实现的过程中，发现了之前分析设计中的不合理，故对设计进行优化。
+
+利用JFormDesigner，将优化后的设计展示如下。
+
+![image-20220212173819478](E:\GitHub\downloaderK\1120191562\blog\image\3\界面\2.png)
+
+单击图中按钮，可以唤起对应的下载窗口。当弹窗加载时，会自动从剪切板里获取相应的内容。
+
+在窗口输入参数并点击OK后，会开始下载，并更新下载状态。下载状态会出现在每个具体下载的窗口里。
+
+一共四个界面，所以需要建立四个负责UI的类。
 
 #### 单元测试设计：
 
@@ -209,6 +243,24 @@
 ![image-20220211185444011](E:\GitHub\downloaderK\1120191562\blog\image\2\性能分析\3.png)
 
 可见，新增类的性能优良。在随后的测试过程中又调整了相应的函数，优化了性能。
+
+### 第3阶段  用户界面
+
+#### 运行代码，分别进行三种方式的下载，使用jProfiler性能分析结果如下：
+
+![image-20220212180141350](E:\GitHub\downloaderK\1120191562\blog\image\3\性能分析\1.png)
+
+![image-20220212180533211](E:\GitHub\downloaderK\1120191562\blog\image\3\性能分析\2.png)
+
+性能测试使用的是四线程下载，这是线程使用情况 ↓
+
+![image-20220212181205349](E:\GitHub\downloaderK\1120191562\blog\image\3\性能分析\5.png)
+
+![image-20220212181053551](E:\GitHub\downloaderK\1120191562\blog\image\3\性能分析\4.png)
+
+下图是单元测试的运行时间结果，结合性能分析，我认为该阶段性能可以接受，没有改进的必要。
+
+![image-20220212180852779](E:\GitHub\downloaderK\1120191562\blog\image\3\性能分析\3.png)
 
 ## 六、代码说明
 
@@ -801,5 +853,961 @@ public class Main {
 
         }
     }
+}
+```
+
+### 第3阶段  用户界面
+
+####  修改和新增的类如下：
+
+#### 类DownloadControl
+
+新增urlsRun方法
+
+```java
+public class DownloadControl {
+
+    //CountDownLatch用于使线程同步
+
+    /**
+     * 多个URLs下载，调用了run()方法
+     * @param urls urls数组
+     * @param savePath 保存路径
+     * @param threadNum 线程数
+     * @return 下载完成返回TRUE
+     */
+    public boolean urlsRun(String[] urls, String savePath, int threadNum) {
+
+            for (int i = 0; i < urls.length; i++) {
+                run(urls[i], savePath, threadNum);
+            }
+            return true;
+    }
+
+    /**
+     * 单个url下载
+     * @param url url
+     * @param savePath 保存路径
+     * @param threadNum 线程数
+     */
+    public void run(String url, String savePath, int threadNum) {
+        final CountDownLatch countDownLatch = new CountDownLatch(threadNum);
+        String fileName = DownloadInfo.getFileName(url, savePath);
+        long everySize = DownloadInfo.calculateEverySize(url, threadNum);
+        //采用线程池的方式
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(threadNum, threadNum, 0, TimeUnit.SECONDS, new ArrayBlockingQueue<>(6));
+        //进行任务切分
+        for (int i = 0; i < threadNum; i++) {
+            long beginSite = (long) i * everySize;
+            long endSite = beginSite + everySize;
+            if (i == threadNum - 1) {
+                endSite = -1;
+            }
+            if (i != 0) {
+                beginSite++;
+            }
+            Downloader downloader = new Downloader(fileName, url, countDownLatch, beginSite, endSite, i);
+            threadPoolExecutor.submit(downloader);
+
+        }
+        //阻塞分块文件，等所有文件下载完成后再合并
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            System.out.println("线程出现异常阻塞！");
+        }
+
+        //合并文件
+        mergeTemp(fileName, threadNum);
+        clearTemp(fileName, threadNum);
+        System.out.println(url + "下载完毕！");
+
+        //关闭线程池
+        threadPoolExecutor.shutdown();
+
+
+    }
+
+    /**
+     * 合并临时文件
+     */
+    public void mergeTemp(String fileName, int threadNum) {
+        System.out.println("开始合并文件");
+        byte[] buffer = new byte[DownloadInfo.Byte_Size];
+
+        int len;
+        try (RandomAccessFile randomAccessFile = new RandomAccessFile(fileName, "rw")) {
+            for (int i = 0; i < threadNum; i++) {
+                try (
+                        BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(fileName + ".temp" + i))//读入内存
+                ) {
+                    while ((len = bufferedInputStream.read(buffer)) != -1) {
+                        randomAccessFile.write(buffer, 0, len);
+                    }
+                }
+            }
+            System.out.println("文件合并完毕");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 清除临时文件
+     */
+    public void clearTemp(String fileName, int threadNum) {
+        for (int i = 0; i < threadNum; i++) {
+            File file = new File(fileName + ".temp" + i);
+            file.delete();
+        }
+        System.out.println("已清除临时文件");
+    }
+
+}
+```
+
+#### 类GetClipbrd
+
+获取剪切板内容
+
+```java
+public class GetClipbrd {
+    /**
+     * 获取剪切板的内容
+     * @return 剪切板内容
+     */
+    public static String getClipbrd() {
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        // 获取剪切板中的内容
+        Transferable transferable = clipboard.getContents(null);
+
+        if (transferable != null) {
+
+            // 检查内容是否是文本类型
+            if (transferable.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+                try {
+                    return (String) transferable.getTransferData(DataFlavor.stringFlavor);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
+    }
+}
+
+```
+
+#### 类IfLegal
+
+新增ifLegalUrls和ifLegalFileName方法
+
+```java
+public class IfLegal {
+    /**
+     * URL是否合法
+     * @param url 传入的URL
+     * @return 合法TRUE，非法false
+     */
+    public static boolean ifLegalURL(String url) {
+
+        if (url == null || url.length() == 0) {
+            return false;
+        }
+
+        try {
+            URL url1 = new URL(url);
+            URLConnection urlConnection = url1.openConnection();
+            urlConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_0) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11");
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 判断保存路径是否合法
+     * @param savePath 保存路径
+     * @return 合法TRUE，非法false
+     */
+    public static boolean ifLegalSavePath(String savePath) {
+        File file = new File(savePath);
+        if (file.exists()) { //用来测试此路径名表示的文件或目录是否存在
+            return file.isDirectory();//测试该目录是否存在
+        }
+        return false;
+    }
+    /**
+     * 判断线程数是否合法
+     * @param threadNum 线程数
+     * @return 合法TRUE，非法false
+     */
+    public static boolean ifLegalThreadNum(int threadNum) {
+        return threadNum > 0 && threadNum <= 32;
+    }
+
+    /**
+     * 文件名是否存在
+     * @param fileName
+     * @return 存在返回true，否则返回false
+     */
+    public static boolean ifLegalFileName(String fileName){
+        File file = new File(fileName);
+        if (file.exists()) { //用来测试此路径名表示的文件或目录是否存在
+            return file.isFile();
+        }
+        return  false;
+    }
+
+    /**
+     * 保存Url的数组中的每个url是否可以正常访问
+     * @param urls
+     * @return 是返回TRUE，否则返回false
+     */
+    public static boolean ifLegalUrls(String[] urls){
+        for (int i = 0; i < urls.length; i++) {
+            if (!ifLegalURL(urls[i])){
+                return  false;
+            }
+        }
+        return true;
+    }
+}
+```
+
+#### 类FileContentReader
+
+负责向setting.txt文件写内容，或者从setting.txt文件中读出内容
+
+```java
+public class FileContentReader {
+    /**
+     * 读取目标文件的第几行
+     * @param fileName 文件名
+     * @param index 第几行
+     * @return 目标字符串
+     */
+    public static String read(String fileName, int index) {
+        System.out.println(System.getProperty("user.dir"));
+        String str = null;//目标字符串
+        try (Scanner scanner = new Scanner(new FileReader(fileName))) {
+            for (int i = 0; i < index; i++) {
+                scanner.hasNextLine();
+                str=scanner.nextLine();
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("链接不能找到");
+            e.printStackTrace();
+        }
+        return str;
+    }
+
+    /**
+     * 写入文件
+     * @param fileName 文件名
+     * @param savePath 保存路径
+     * @param threadNum 线程是
+     */
+    public static void write(String fileName,String savePath,String threadNum)  {
+        try {
+            File file= new  File(fileName);
+            if (!file.exists()){//如果文件不存在，创建一个新的文件
+                file.createNewFile();
+            }
+            FileWriter fileWriter= new FileWriter(file);
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+            bufferedWriter.write(savePath+"\n"+threadNum);
+            bufferedWriter.flush(); //将数据更新至文件
+            bufferedWriter.close();
+            fileWriter.close();
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+}
+```
+
+#### 下面是使用JFormDesigner生成的java swing代码
+
+##### MainUI
+
+```java
+public class MainUI extends JFrame {
+    public MainUI() {
+        initComponents();
+        writeTextField();
+    }
+
+    private void urlsButtonMouseClicked(MouseEvent e) {
+        // TODO add your code here
+        UrlsDownloadUI urlsDownloadUI=new UrlsDownloadUI();
+        urlsDownloadUI.setVisible(true);
+    }
+
+    private void fileNameButtonMouseClicked(MouseEvent e) {
+        // TODO add your code here
+        FileDownloadUI fileDownloadUI=new FileDownloadUI();
+        fileDownloadUI.setVisible(true);
+        // TODO add your code here
+    }
+
+    private void regexUrlButtonMouseClicked(MouseEvent e) {
+        RegexUrlDownloadUI regexUrlDownloadUI=new RegexUrlDownloadUI();
+        regexUrlDownloadUI.setVisible(true);
+        // TODO add your code here
+    }
+
+    private void saveSettingsButtonMouseClicked(MouseEvent e) {
+        // TODO add your code here
+        System.out.println(savePathTextArea.getText());
+        FileContentReader.write("E:\\GitHub\\downloaderK\\1120191562\\Downloader\\downloader\\src\\setting\\settings.txt",savePathTextArea.getText(),threadNumTextField.getText());
+
+    }
+
+    private void initComponents() {
+        // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+        ResourceBundle bundle = ResourceBundle.getBundle("downloadUI.main.main");
+        dialogPane = new JPanel();
+        contentPanel = new JPanel();
+        panel1 = new JPanel();
+        panel3 = new JPanel();
+        urlsButton = new JButton();
+        fileNameButton = new JButton();
+        regexUrlButton = new JButton();
+        panel4 = new JPanel();
+        panel7 = new JPanel();
+        panel8 = new JPanel();
+        label2 = new JLabel();
+        threadNumTextField = new JTextField();
+        panel9 = new JPanel();
+        panel12 = new JPanel();
+        panel13 = new JPanel();
+        label1 = new JLabel();
+        savePathTextArea = new JTextArea();
+        panel10 = new JPanel();
+        panel11 = new JPanel();
+        saveSettingsButton = new JButton();
+
+        //======== this ========
+        var contentPane = getContentPane();
+        contentPane.setLayout(new BorderLayout());
+
+        //======== dialogPane ========
+        {
+            dialogPane.setBorder(new EmptyBorder(12, 12, 12, 12));
+            dialogPane.setLayout(new BorderLayout());
+
+            //======== contentPanel ========
+            {
+                contentPanel.setLayout(new GridLayout(3, 1));
+
+                //======== panel1 ========
+                {
+                    panel1.setLayout(new GridLayout(2, 1));
+
+                    //======== panel3 ========
+                    {
+                        panel3.setLayout(new GridLayout(1, 7));
+
+                        //---- urlsButton ----
+                        urlsButton.setText(bundle.getString("MainUI.urlsButton.text"));
+                        urlsButton.addMouseListener(new MouseAdapter() {
+                            @Override
+                            public void mouseClicked(MouseEvent e) {
+                                urlsButtonMouseClicked(e);
+                            }
+                        });
+                        panel3.add(urlsButton);
+
+                        //---- fileNameButton ----
+                        fileNameButton.setText(bundle.getString("MainUI.fileNameButton.text"));
+                        fileNameButton.addMouseListener(new MouseAdapter() {
+                            @Override
+                            public void mouseClicked(MouseEvent e) {
+                                fileNameButtonMouseClicked(e);
+                            }
+                        });
+                        panel3.add(fileNameButton);
+
+                        //---- regexUrlButton ----
+                        regexUrlButton.setText(bundle.getString("MainUI.regexUrlButton.text"));
+                        regexUrlButton.addMouseListener(new MouseAdapter() {
+                            @Override
+                            public void mouseClicked(MouseEvent e) {
+                                regexUrlButtonMouseClicked(e);
+                            }
+                        });
+                        panel3.add(regexUrlButton);
+                    }
+                    panel1.add(panel3);
+                }
+                contentPanel.add(panel1);
+
+                //======== panel4 ========
+                {
+                    panel4.setLayout(new GridLayout(2, 1));
+
+                    //======== panel7 ========
+                    {
+                        panel7.setLayout(new GridLayout(1, 1));
+                    }
+                    panel4.add(panel7);
+
+                    //======== panel8 ========
+                    {
+                        panel8.setLayout(new GridLayout(1, 2));
+
+                        //---- label2 ----
+                        label2.setText(bundle.getString("MainUI.label2.text"));
+                        panel8.add(label2);
+
+                        //---- threadNumTextField ----
+                        threadNumTextField.setText(bundle.getString("MainUI.threadNumTextField.text"));
+                        panel8.add(threadNumTextField);
+                    }
+                    panel4.add(panel8);
+                }
+                contentPanel.add(panel4);
+
+                //======== panel9 ========
+                {
+                    panel9.setLayout(new GridLayout(2, 1));
+
+                    //======== panel12 ========
+                    {
+                        panel12.setLayout(new GridLayout(1, 1));
+
+                        //======== panel13 ========
+                        {
+                            panel13.setLayout(new GridLayout(1, 2));
+
+                            //---- label1 ----
+                            label1.setText(bundle.getString("MainUI.label1.text"));
+                            panel13.add(label1);
+
+                            //---- savePathTextArea ----
+                            savePathTextArea.setPreferredSize(new Dimension(3, 15));
+                            savePathTextArea.setText(bundle.getString("MainUI.savePathTextArea.text"));
+                            panel13.add(savePathTextArea);
+                        }
+                        panel12.add(panel13);
+                    }
+                    panel9.add(panel12);
+
+                    //======== panel10 ========
+                    {
+                        panel10.setLayout(new GridLayout(1, 2));
+
+                        //======== panel11 ========
+                        {
+                            panel11.setLayout(new GridLayout(1, 1));
+                        }
+                        panel10.add(panel11);
+
+                        //---- saveSettingsButton ----
+                        saveSettingsButton.setText(bundle.getString("MainUI.saveSettingsButton.text"));
+                        saveSettingsButton.addMouseListener(new MouseAdapter() {
+                            @Override
+                            public void mouseClicked(MouseEvent e) {
+                                saveSettingsButtonMouseClicked(e);
+                            }
+                        });
+                        panel10.add(saveSettingsButton);
+                    }
+                    panel9.add(panel10);
+                }
+                contentPanel.add(panel9);
+            }
+            dialogPane.add(contentPanel, BorderLayout.CENTER);
+        }
+        contentPane.add(dialogPane, BorderLayout.CENTER);
+        pack();
+        setLocationRelativeTo(getOwner());
+        // JFormDesigner - End of component initialization  //GEN-END:initComponents
+
+    }
+    private void writeTextField(){
+        System.out.println(System.getProperty("user.dir"));
+
+        String fileName="E:\\GitHub\\downloaderK\\1120191562\\Downloader\\downloader\\src\\setting\\settings.txt";
+
+            //向文本框写入设置数据
+            String str= FileContentReader.read(fileName,1);
+            System.out.println(str);
+            savePathTextArea.setText(str);
+            str= FileContentReader.read(fileName,2);
+            threadNumTextField.setText(str);
+
+
+
+    }
+    private void fileNameButtonMouseDragged(MouseEvent e) {
+    }
+
+    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
+    private JPanel dialogPane;
+    private JPanel contentPanel;
+    private JPanel panel1;
+    private JPanel panel3;
+    private JButton urlsButton;
+    private JButton fileNameButton;
+    private JButton regexUrlButton;
+    private JPanel panel4;
+    private JPanel panel7;
+    private JPanel panel8;
+    private JLabel label2;
+    private JTextField threadNumTextField;
+    private JPanel panel9;
+    private JPanel panel12;
+    private JPanel panel13;
+    private JLabel label1;
+    private JTextArea savePathTextArea;
+    private JPanel panel10;
+    private JPanel panel11;
+    private JButton saveSettingsButton;
+    // JFormDesigner - End of variables declaration  //GEN-END:variables
+}
+```
+
+##### FileDownloadUI
+
+```java
+public class FileDownloadUI extends JFrame {
+    public FileDownloadUI() {
+        initComponents();
+        fileNametextArea.setText(GetClipbrd.getClipbrd());
+    }
+
+    private void okButtonMouseClicked(MouseEvent e) {
+        // TODO add your code here
+        boolean flag;
+        if(IfLegal.ifLegalFileName(fileNametextArea.getText())){
+            System.out.println("进入okButtonMouseClicked");
+            UrlReader urlReader = new UrlReader();
+            urlReader.getFromFileUrls(fileNametextArea.getText());
+            String[] urls= urlReader.getUrlArray();
+
+            if (IfLegal.ifLegalUrls(urls)){
+                label1.setText("正在下载！！！");
+                DownloadControl downloadControl = new DownloadControl();
+                flag= downloadControl.urlsRun(urls,FileContentReader.read("E:\\GitHub\\downloaderK\\1120191562\\Downloader\\downloader\\src\\setting\\settings.txt",1),Integer.parseInt(FileContentReader.read("E:\\GitHub\\downloaderK\\1120191562\\Downloader\\downloader\\src\\setting\\settings.txt",2)));
+
+                if (flag){
+                    JOptionPane.showMessageDialog(null, "下载完成");
+                    label1.setText("没有下载任务");
+                }
+            }else {
+                JOptionPane.showMessageDialog(null, "存在非法url，请重新输入");
+            }
+
+            label1.setText("没有下载任务");
+        }else{
+            JOptionPane.showMessageDialog(null, "文件路径不存在，请重新输入");
+        }
+
+
+    }
+
+    private void cancelButtonMouseClicked(MouseEvent e) {
+        // TODO add your code here
+        this.setVisible(false);
+    }
+
+    private void initComponents() {
+        // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+        ResourceBundle bundle = ResourceBundle.getBundle("downloadUI.main.main");
+        dialogPane = new JPanel();
+        contentPanel = new JPanel();
+        scrollPane1 = new JScrollPane();
+        fileNametextArea = new JTextArea();
+        buttonBar = new JPanel();
+        label1 = new JLabel();
+        okButton = new JButton();
+        cancelButton = new JButton();
+
+        //======== this ========
+        var contentPane = getContentPane();
+        contentPane.setLayout(new BorderLayout());
+
+        //======== dialogPane ========
+        {
+            dialogPane.setBorder(new EmptyBorder(12, 12, 12, 12));
+            dialogPane.setLayout(new BorderLayout());
+
+            //======== contentPanel ========
+            {
+                contentPanel.setLayout(new GridLayout());
+
+                //======== scrollPane1 ========
+                {
+                    scrollPane1.setViewportView(fileNametextArea);
+                }
+                contentPanel.add(scrollPane1);
+            }
+            dialogPane.add(contentPanel, BorderLayout.CENTER);
+
+            //======== buttonBar ========
+            {
+                buttonBar.setBorder(new EmptyBorder(12, 0, 0, 0));
+                buttonBar.setLayout(new GridBagLayout());
+                ((GridBagLayout)buttonBar.getLayout()).columnWidths = new int[] {0, 85, 80};
+                ((GridBagLayout)buttonBar.getLayout()).columnWeights = new double[] {1.0, 0.0, 0.0};
+
+                //---- label1 ----
+                label1.setText(bundle.getString("FileDownloadUI.label1.text"));
+                buttonBar.add(label1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                    new Insets(0, 0, 0, 5), 0, 0));
+
+                //---- okButton ----
+                okButton.setText(bundle.getString("FileDownloadUI.okButton.text"));
+                okButton.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        okButtonMouseClicked(e);
+                    }
+                });
+                buttonBar.add(okButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                    new Insets(0, 0, 0, 5), 0, 0));
+
+                //---- cancelButton ----
+                cancelButton.setText(bundle.getString("FileDownloadUI.cancelButton.text"));
+                cancelButton.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        cancelButtonMouseClicked(e);
+                    }
+                });
+                buttonBar.add(cancelButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                    new Insets(0, 0, 0, 0), 0, 0));
+            }
+            dialogPane.add(buttonBar, BorderLayout.SOUTH);
+        }
+        contentPane.add(dialogPane, BorderLayout.CENTER);
+        pack();
+        setLocationRelativeTo(getOwner());
+        // JFormDesigner - End of component initialization  //GEN-END:initComponents
+    }
+
+    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
+    private JPanel dialogPane;
+    private JPanel contentPanel;
+    private JScrollPane scrollPane1;
+    private JTextArea fileNametextArea;
+    private JPanel buttonBar;
+    private JLabel label1;
+    private JButton okButton;
+    private JButton cancelButton;
+    // JFormDesigner - End of variables declaration  //GEN-END:variables
+}
+```
+
+##### RegexUrlDownloadUI
+
+```java
+public class RegexUrlDownloadUI extends JFrame {
+    public RegexUrlDownloadUI() {
+        initComponents();
+        RegexUrltextArea.setText(GetClipbrd.getClipbrd());
+    }
+
+    boolean flag=true;
+    private void okButtonMouseClicked(MouseEvent e) {
+        // TODO add your code here
+        UrlReader urlReader=new UrlReader();
+        urlReader.getFromRegexUrl(RegexUrltextArea.getText(),Integer.parseInt(startTextField.getText()) ,Integer.parseInt(endTextField.getText()));
+        String[] urls= urlReader.getUrlArray();
+        if (IfLegal.ifLegalUrls(urls)){
+            statusLabel.setText("正在下载！！！");
+            DownloadControl downloadControl = new DownloadControl();
+            flag= downloadControl.urlsRun(urls, FileContentReader.read("E:\\GitHub\\downloaderK\\1120191562\\Downloader\\downloader\\src\\setting\\settings.txt",1),Integer.parseInt(FileContentReader.read("E:\\GitHub\\downloaderK\\1120191562\\Downloader\\downloader\\src\\setting\\settings.txt",2)));
+            if (flag){
+                JOptionPane.showMessageDialog(null, "下载完成");
+                statusLabel.setText("没有下载任务");
+            }
+            statusLabel.setText("没有下载任务");
+        }else{
+            JOptionPane.showMessageDialog(null, "存在非法链接，请重新输入");
+
+        }
+
+    }
+
+    private void cancelButtonMouseClicked(MouseEvent e) {
+        // TODO add your code here
+        this.setVisible(false);
+    }
+
+    private void initComponents() {
+        // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+        ResourceBundle bundle = ResourceBundle.getBundle("downloadUI.main.main");
+        dialogPane = new JPanel();
+        contentPanel = new JPanel();
+        panel3 = new JPanel();
+        label1 = new JLabel();
+        panel1 = new JPanel();
+        scrollPane1 = new JScrollPane();
+        RegexUrltextArea = new JTextArea();
+        panel2 = new JPanel();
+        label2 = new JLabel();
+        startTextField = new JTextField();
+        label3 = new JLabel();
+        endTextField = new JTextField();
+        buttonBar = new JPanel();
+        statusLabel = new JLabel();
+        okButton = new JButton();
+        cancelButton = new JButton();
+
+        //======== this ========
+        var contentPane = getContentPane();
+        contentPane.setLayout(new BorderLayout());
+
+        //======== dialogPane ========
+        {
+            dialogPane.setBorder(new EmptyBorder(12, 12, 12, 12));
+            dialogPane.setLayout(new BorderLayout());
+
+            //======== contentPanel ========
+            {
+                contentPanel.setLayout(new GridLayout(3, 2));
+
+                //======== panel3 ========
+                {
+                    panel3.setLayout(new GridLayout(1, 1));
+
+                    //---- label1 ----
+                    label1.setText(bundle.getString("RegexUrlDownloadUI.label1.text"));
+                    panel3.add(label1);
+                }
+                contentPanel.add(panel3);
+
+                //======== panel1 ========
+                {
+                    panel1.setLayout(new GridLayout(1, 1));
+
+                    //======== scrollPane1 ========
+                    {
+                        scrollPane1.setViewportView(RegexUrltextArea);
+                    }
+                    panel1.add(scrollPane1);
+                }
+                contentPanel.add(panel1);
+
+                //======== panel2 ========
+                {
+                    panel2.setLayout(new GridLayout(1, 4));
+
+                    //---- label2 ----
+                    label2.setText(bundle.getString("RegexUrlDownloadUI.label2.text"));
+                    panel2.add(label2);
+                    panel2.add(startTextField);
+
+                    //---- label3 ----
+                    label3.setText(bundle.getString("RegexUrlDownloadUI.label3.text"));
+                    panel2.add(label3);
+                    panel2.add(endTextField);
+                }
+                contentPanel.add(panel2);
+            }
+            dialogPane.add(contentPanel, BorderLayout.CENTER);
+
+            //======== buttonBar ========
+            {
+                buttonBar.setBorder(new EmptyBorder(12, 0, 0, 0));
+                buttonBar.setLayout(new GridBagLayout());
+                ((GridBagLayout)buttonBar.getLayout()).columnWidths = new int[] {0, 85, 80};
+                ((GridBagLayout)buttonBar.getLayout()).columnWeights = new double[] {1.0, 0.0, 0.0};
+
+                //---- statusLabel ----
+                statusLabel.setText(bundle.getString("RegexUrlDownloadUI.statusLabel.text"));
+                buttonBar.add(statusLabel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                    new Insets(0, 0, 0, 5), 0, 0));
+
+                //---- okButton ----
+                okButton.setText(bundle.getString("RegexUrlDownloadUI.okButton.text"));
+                okButton.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        okButtonMouseClicked(e);
+                    }
+                });
+                buttonBar.add(okButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                    new Insets(0, 0, 0, 5), 0, 0));
+
+                //---- cancelButton ----
+                cancelButton.setText(bundle.getString("RegexUrlDownloadUI.cancelButton.text"));
+                cancelButton.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        cancelButtonMouseClicked(e);
+                    }
+                });
+                buttonBar.add(cancelButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                    new Insets(0, 0, 0, 0), 0, 0));
+            }
+            dialogPane.add(buttonBar, BorderLayout.SOUTH);
+        }
+        contentPane.add(dialogPane, BorderLayout.CENTER);
+        pack();
+        setLocationRelativeTo(getOwner());
+        // JFormDesigner - End of component initialization  //GEN-END:initComponents
+    }
+
+    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
+    private JPanel dialogPane;
+    private JPanel contentPanel;
+    private JPanel panel3;
+    private JLabel label1;
+    private JPanel panel1;
+    private JScrollPane scrollPane1;
+    private JTextArea RegexUrltextArea;
+    private JPanel panel2;
+    private JLabel label2;
+    private JTextField startTextField;
+    private JLabel label3;
+    private JTextField endTextField;
+    private JPanel buttonBar;
+    private JLabel statusLabel;
+    private JButton okButton;
+    private JButton cancelButton;
+    // JFormDesigner - End of variables declaration  //GEN-END:variables
+}
+```
+
+##### UrlsDownloadUI
+
+```java
+public class UrlsDownloadUI extends JFrame {
+    public UrlsDownloadUI() {
+        initComponents();
+        urlsTextArea.setText(GetClipbrd.getClipbrd());
+    }
+
+    private void okButtonMouseClicked(MouseEvent e) {
+        // TODO add your code here
+
+        boolean flag=false;
+        UrlReader urlReader=new UrlReader();
+        urlReader.getFromVariableUrls(urlsTextArea.getText());
+        String[] urls=urlReader.getUrlArray();
+        if (IfLegal.ifLegalUrls(urls)){
+            label1.setText("正在下载！！！");
+            DownloadControl downloadControl = new DownloadControl();
+
+            flag= downloadControl.urlsRun(urls, FileContentReader.read("E:\\GitHub\\downloaderK\\1120191562\\Downloader\\downloader\\src\\setting\\settings.txt",1),Integer.parseInt(FileContentReader.read("E:\\GitHub\\downloaderK\\1120191562\\Downloader\\downloader\\src\\setting\\settings.txt",2)));
+            if (flag){
+                JOptionPane.showMessageDialog(null, "下载完成");
+                label1.setText("没有下载任务");
+            }
+        }else {
+            JOptionPane.showMessageDialog(null,"存在非法链接，请重新输入！");
+        }
+
+
+
+
+}
+
+private void cancelButtonMouseClicked(MouseEvent e) {
+    // TODO add your code here
+    this.setVisible(false);
+}
+
+    private void initComponents() {
+        // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+        ResourceBundle bundle = ResourceBundle.getBundle("downloadUI.main.main");
+        dialogPane = new JPanel();
+        contentPanel = new JPanel();
+        scrollPane1 = new JScrollPane();
+        urlsTextArea = new JTextArea();
+        buttonBar = new JPanel();
+        label1 = new JLabel();
+        okButton = new JButton();
+        cancelButton = new JButton();
+
+        //======== this ========
+        var contentPane = getContentPane();
+        contentPane.setLayout(new BorderLayout());
+
+        //======== dialogPane ========
+        {
+            dialogPane.setBorder(new EmptyBorder(12, 12, 12, 12));
+            dialogPane.setLayout(new BorderLayout());
+
+            //======== contentPanel ========
+            {
+                contentPanel.setLayout(new GridLayout());
+
+                //======== scrollPane1 ========
+                {
+                    scrollPane1.setViewportView(urlsTextArea);
+                }
+                contentPanel.add(scrollPane1);
+            }
+            dialogPane.add(contentPanel, BorderLayout.CENTER);
+
+            //======== buttonBar ========
+            {
+                buttonBar.setBorder(new EmptyBorder(12, 0, 0, 0));
+                buttonBar.setLayout(new GridBagLayout());
+                ((GridBagLayout)buttonBar.getLayout()).columnWidths = new int[] {0, 85, 80};
+                ((GridBagLayout)buttonBar.getLayout()).columnWeights = new double[] {1.0, 0.0, 0.0};
+
+                //---- label1 ----
+                label1.setText(bundle.getString("UrlsDownloadUI.label1.text"));
+                buttonBar.add(label1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                    new Insets(0, 0, 0, 5), 0, 0));
+
+                //---- okButton ----
+                okButton.setText(bundle.getString("UrlsDownloadUI.okButton.text"));
+                okButton.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        okButtonMouseClicked(e);
+                    }
+                });
+                buttonBar.add(okButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                    new Insets(0, 0, 0, 5), 0, 0));
+
+                //---- cancelButton ----
+                cancelButton.setText(bundle.getString("UrlsDownloadUI.cancelButton.text"));
+                cancelButton.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        cancelButtonMouseClicked(e);
+                    }
+                });
+                buttonBar.add(cancelButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                    new Insets(0, 0, 0, 0), 0, 0));
+            }
+            dialogPane.add(buttonBar, BorderLayout.SOUTH);
+        }
+        contentPane.add(dialogPane, BorderLayout.CENTER);
+        pack();
+        setLocationRelativeTo(getOwner());
+        // JFormDesigner - End of component initialization  //GEN-END:initComponents
+    }
+
+    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
+    private JPanel dialogPane;
+    private JPanel contentPanel;
+    private JScrollPane scrollPane1;
+    private JTextArea urlsTextArea;
+    private JPanel buttonBar;
+    private JLabel label1;
+    private JButton okButton;
+    private JButton cancelButton;
+    // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
 ```

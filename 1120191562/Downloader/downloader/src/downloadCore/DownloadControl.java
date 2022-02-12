@@ -11,6 +11,13 @@ public class DownloadControl {
 
     //CountDownLatch用于使线程同步
 
+    /**
+     * 多个URLs下载，调用了run()方法
+     * @param urls urls数组
+     * @param savePath 保存路径
+     * @param threadNum 线程数
+     * @return 下载完成返回TRUE
+     */
     public boolean urlsRun(String[] urls, String savePath, int threadNum) {
 
             for (int i = 0; i < urls.length; i++) {
@@ -19,6 +26,12 @@ public class DownloadControl {
             return true;
     }
 
+    /**
+     * 单个url下载
+     * @param url url
+     * @param savePath 保存路径
+     * @param threadNum 线程数
+     */
     public void run(String url, String savePath, int threadNum) {
         final CountDownLatch countDownLatch = new CountDownLatch(threadNum);
         String fileName = DownloadInfo.getFileName(url, savePath);

@@ -24,6 +24,13 @@ public class FileContentReader {
         }
         return str;
     }
+
+    /**
+     * 写入文件
+     * @param fileName 文件名
+     * @param savePath 保存路径
+     * @param threadNum 线程是
+     */
     public static void write(String fileName,String savePath,String threadNum)  {
         try {
             File file= new  File(fileName);

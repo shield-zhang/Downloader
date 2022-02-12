@@ -12,6 +12,7 @@ public class Main {
 
         MainUI mainUI=new MainUI();
         mainUI.setVisible(true);
+//下面是第二阶段代码
 //        JOptionPane.showMessageDialog(null, "普通对话框");
 //        Scanner scanner = new Scanner(System.in);
 //        String url;

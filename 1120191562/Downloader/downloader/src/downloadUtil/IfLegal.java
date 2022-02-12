@@ -51,6 +51,12 @@ public class IfLegal {
     public static boolean ifLegalThreadNum(int threadNum) {
         return threadNum > 0 && threadNum <= 32;
     }
+
+    /**
+     * 文件名是否存在
+     * @param fileName
+     * @return 存在返回true，否则返回false
+     */
     public static boolean ifLegalFileName(String fileName){
         File file = new File(fileName);
         if (file.exists()) { //用来测试此路径名表示的文件或目录是否存在
@@ -58,6 +64,12 @@ public class IfLegal {
         }
         return  false;
     }
+
+    /**
+     * 保存Url的数组中的每个url是否可以正常访问
+     * @param urls
+     * @return 是返回TRUE，否则返回false
+     */
     public static boolean ifLegalUrls(String[] urls){
         for (int i = 0; i < urls.length; i++) {
             if (!ifLegalURL(urls[i])){
