@@ -1,9 +1,6 @@
 package downloadCore;
 
 
-import downloadUtil.IfLegal;
-
-import javax.swing.*;
 import java.io.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;

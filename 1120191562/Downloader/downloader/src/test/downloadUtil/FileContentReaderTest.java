@@ -22,8 +22,6 @@ class FileContentReaderTest {
     }
     @Test
     void write() {
-
         FileContentReader.write("src/setting/settings.txt","E:\\save","8");
     }
-
 }

@@ -6,6 +6,7 @@ package downloadUI.urlsDownload;
 
 import downloadCore.DownloadControl;
 import downloadUtil.FileContentReader;
+import downloadUtil.GetClipbrd;
 import downloadUtil.IfLegal;
 import downloadUtil.UrlReader;
 
@@ -21,6 +22,7 @@ import javax.swing.border.*;
 public class UrlsDownloadUI extends JFrame {
     public UrlsDownloadUI() {
         initComponents();
+        urlsTextArea.setText(GetClipbrd.getClipbrd());
     }
 
     private void okButtonMouseClicked(MouseEvent e) {

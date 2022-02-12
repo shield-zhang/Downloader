@@ -6,6 +6,7 @@ package downloadUI.regexUrlDownload;
 
 import downloadCore.DownloadControl;
 import downloadUtil.FileContentReader;
+import downloadUtil.GetClipbrd;
 import downloadUtil.IfLegal;
 import downloadUtil.UrlReader;
 
@@ -21,6 +22,7 @@ import javax.swing.border.*;
 public class RegexUrlDownloadUI extends JFrame {
     public RegexUrlDownloadUI() {
         initComponents();
+        RegexUrltextArea.setText(GetClipbrd.getClipbrd());
     }
 
     boolean flag=true;

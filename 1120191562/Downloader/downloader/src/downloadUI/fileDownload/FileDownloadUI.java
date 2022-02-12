@@ -6,6 +6,7 @@ package downloadUI.fileDownload;
 
 import downloadCore.DownloadControl;
 import downloadUtil.FileContentReader;
+import downloadUtil.GetClipbrd;
 import downloadUtil.IfLegal;
 import downloadUtil.UrlReader;
 
@@ -21,15 +22,16 @@ import javax.swing.border.*;
 public class FileDownloadUI extends JFrame {
     public FileDownloadUI() {
         initComponents();
+        fileNametextArea.setText(GetClipbrd.getClipbrd());
     }
 
     private void okButtonMouseClicked(MouseEvent e) {
         // TODO add your code here
-        boolean flag=false;
-        if(IfLegal.ifLegalFileName(fileNametextArea.getText().toString())){
+        boolean flag;
+        if(IfLegal.ifLegalFileName(fileNametextArea.getText())){
             System.out.println("进入okButtonMouseClicked");
             UrlReader urlReader = new UrlReader();
-            urlReader.getFromFileUrls(fileNametextArea.getText().toString());
+            urlReader.getFromFileUrls(fileNametextArea.getText());
             String[] urls= urlReader.getUrlArray();
 
             if (IfLegal.ifLegalUrls(urls)){

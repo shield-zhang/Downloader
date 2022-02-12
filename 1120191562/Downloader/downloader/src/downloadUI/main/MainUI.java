@@ -21,6 +21,7 @@ import javax.swing.border.*;
 public class MainUI extends JFrame {
     public MainUI() {
         initComponents();
+        writeTextField();
     }
 
     private void urlsButtonMouseClicked(MouseEvent e) {
@@ -205,7 +206,6 @@ public class MainUI extends JFrame {
             }
             dialogPane.add(contentPanel, BorderLayout.CENTER);
         }
-        writeTextField();
         contentPane.add(dialogPane, BorderLayout.CENTER);
         pack();
         setLocationRelativeTo(getOwner());
@@ -213,12 +213,18 @@ public class MainUI extends JFrame {
 
     }
     private void writeTextField(){
-        //向文本框写入设置数据
-        String str= FileContentReader.read("E:\\GitHub\\downloaderK\\1120191562\\Downloader\\downloader\\src\\setting\\settings.txt",1);
-        System.out.println(str);
-       savePathTextArea.setText(str);
-        str= FileContentReader.read("E:\\GitHub\\downloaderK\\1120191562\\Downloader\\downloader\\src\\setting\\settings.txt",2);
-       threadNumTextField.setText(str);
+        System.out.println(System.getProperty("user.dir"));
+
+        String fileName="E:\\GitHub\\downloaderK\\1120191562\\Downloader\\downloader\\src\\setting\\settings.txt";
+
+            //向文本框写入设置数据
+            String str= FileContentReader.read(fileName,1);
+            System.out.println(str);
+            savePathTextArea.setText(str);
+            str= FileContentReader.read(fileName,2);
+            threadNumTextField.setText(str);
+
+
 
     }
     private void fileNameButtonMouseDragged(MouseEvent e) {
