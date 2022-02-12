@@ -30,13 +30,11 @@ new FormModel {
 								name: "urlsButton"
 								"text": new FormMessage( null, "MainUI.urlsButton.text" )
 								addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseClicked", "urlsButtonMouseClicked", true ) )
-								addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseClicked", "urlsButtonMouseClicked", true ) )
 							} )
 							add( new FormComponent( "javax.swing.JButton" ) {
 								name: "fileNameButton"
 								"text": new FormMessage( null, "MainUI.fileNameButton.text" )
 								addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseClicked", "fileNameButtonMouseClicked", true ) )
-								addEvent( new FormEvent( "java.awt.event.MouseMotionListener", "mouseDragged", "fileNameButtonMouseDragged", true ) )
 							} )
 							add( new FormComponent( "javax.swing.JButton" ) {
 								name: "regexUrlButton"
@@ -64,8 +62,8 @@ new FormModel {
 								"text": new FormMessage( null, "MainUI.label2.text" )
 							} )
 							add( new FormComponent( "javax.swing.JTextField" ) {
-								name: "textField2"
-								"text": new FormMessage( null, "MainUI.textField2.text" )
+								name: "threadNumTextField"
+								"text": new FormMessage( null, "MainUI.threadNumTextField.text" )
 							} )
 						} )
 					} )

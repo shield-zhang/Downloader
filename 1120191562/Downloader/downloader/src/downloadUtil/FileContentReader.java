@@ -1,7 +1,6 @@
 package downloadUtil;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 import java.util.Scanner;
 
 public class FileContentReader {
@@ -11,6 +10,7 @@ public class FileContentReader {
      * @param index 第几行
      * @return 目标字符串
      */
+    public static String strTest;
     public static String read(String fileName, int index) {
         String str = null;//目标字符串
         try (Scanner scanner = new Scanner(new FileReader(fileName))) {
@@ -22,6 +22,24 @@ public class FileContentReader {
             System.out.println("链接不能找到");
             e.printStackTrace();
         }
+        strTest=str;
         return str;
+    }
+    public static void write(String fileName,String savePath,String threadNum)  {
+        try {
+            File file= new  File(fileName);
+            if (!file.exists()){//如果文件不存在，创建一个新的文件
+                file.createNewFile();
+            }
+            FileWriter fileWriter= new FileWriter(file);
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+            bufferedWriter.write(savePath+"\n"+threadNum);
+            bufferedWriter.flush(); //将数据更新至文件
+            bufferedWriter.close();
+            fileWriter.close();
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }

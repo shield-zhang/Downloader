@@ -29,8 +29,6 @@ public class IfLegal {
             e.printStackTrace();
             return false;
         }
-
-
     }
 
     /**
@@ -45,7 +43,6 @@ public class IfLegal {
         }
         return false;
     }
-
     /**
      * 判断线程数是否合法
      * @param threadNum 线程数
@@ -53,5 +50,20 @@ public class IfLegal {
      */
     public static boolean ifLegalThreadNum(int threadNum) {
         return threadNum > 0 && threadNum <= 32;
+    }
+    public static boolean ifLegalFileName(String fileName){
+        File file = new File(fileName);
+        if (file.exists()) { //用来测试此路径名表示的文件或目录是否存在
+            return file.isFile();
+        }
+        return  false;
+    }
+    public static boolean ifLegalUrls(String[] urls){
+        for (int i = 0; i < urls.length; i++) {
+            if (!ifLegalURL(urls[i])){
+                return  false;
+            }
+        }
+        return true;
     }
 }

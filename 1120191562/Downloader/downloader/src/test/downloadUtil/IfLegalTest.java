@@ -25,9 +25,21 @@ class IfLegalTest {
         Assertions.assertTrue(IfLegal.ifLegalSavePath("E:\\save"));
         Assertions.assertFalse(IfLegal.ifLegalSavePath("wwwas"));
     }
-
+    @Test
+    void ifLegalFileName() {
+        Assertions.assertTrue(IfLegal.ifLegalFileName("E:\\save\\test.txt"));
+        Assertions.assertFalse(IfLegal.ifLegalFileName("wwwas"));
+    }
     @Test
     void ifLegalThreadNum() {
         Assertions.assertTrue(IfLegal.ifLegalThreadNum(1));
+    }
+    @Test
+    void ifLegalUrls(){
+        String[] urls1={"https://down5.huorong.cn/sysdiag-full-5.0.65.2-2022.2.11.1.exe","https://plc.jj20.com/up/allimg/1112/031319114916/1Z313114916-2.jpg","https://plc.jj20.com/up/allimg/1112/031319114916/1Z313114916-2.jpg" };
+        String[] urls2={"fdgfhgjhkjluyitf","https://plc.jj20.com/up/allimg/1112/031319114916/1Z313114916-2.jpg","https://plc.jj20.com/up/allimg/1112/031319114916/1Z313114916-2.jpg" };
+
+        Assertions.assertTrue(IfLegal.ifLegalUrls(urls1));
+        Assertions.assertFalse(IfLegal.ifLegalUrls(urls2));
     }
 }

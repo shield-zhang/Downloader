@@ -7,6 +7,7 @@ package downloadUI.main;
 import downloadUI.fileDownload.FileDownloadUI;
 import downloadUI.regexUrlDownload.RegexUrlDownloadUI;
 import downloadUI.urlsDownload.UrlsDownloadUI;
+import downloadUtil.FileContentReader;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -43,6 +44,8 @@ public class MainUI extends JFrame {
 
     private void saveSettingsButtonMouseClicked(MouseEvent e) {
         // TODO add your code here
+        System.out.println(savePathTextArea.getText());
+        FileContentReader.write("E:\\GitHub\\downloaderK\\1120191562\\Downloader\\downloader\\src\\setting\\settings.txt",savePathTextArea.getText(),threadNumTextField.getText());
 
     }
 
@@ -60,7 +63,7 @@ public class MainUI extends JFrame {
         panel7 = new JPanel();
         panel8 = new JPanel();
         label2 = new JLabel();
-        textField2 = new JTextField();
+        threadNumTextField = new JTextField();
         panel9 = new JPanel();
         panel12 = new JPanel();
         panel13 = new JPanel();
@@ -97,7 +100,6 @@ public class MainUI extends JFrame {
                             @Override
                             public void mouseClicked(MouseEvent e) {
                                 urlsButtonMouseClicked(e);
-                                urlsButtonMouseClicked(e);
                             }
                         });
                         panel3.add(urlsButton);
@@ -108,12 +110,6 @@ public class MainUI extends JFrame {
                             @Override
                             public void mouseClicked(MouseEvent e) {
                                 fileNameButtonMouseClicked(e);
-                            }
-                        });
-                        fileNameButton.addMouseMotionListener(new MouseMotionAdapter() {
-                            @Override
-                            public void mouseDragged(MouseEvent e) {
-                                fileNameButtonMouseDragged(e);
                             }
                         });
                         panel3.add(fileNameButton);
@@ -150,9 +146,9 @@ public class MainUI extends JFrame {
                         label2.setText(bundle.getString("MainUI.label2.text"));
                         panel8.add(label2);
 
-                        //---- textField2 ----
-                        textField2.setText(bundle.getString("MainUI.textField2.text"));
-                        panel8.add(textField2);
+                        //---- threadNumTextField ----
+                        threadNumTextField.setText(bundle.getString("MainUI.threadNumTextField.text"));
+                        panel8.add(threadNumTextField);
                     }
                     panel4.add(panel8);
                 }
@@ -209,12 +205,22 @@ public class MainUI extends JFrame {
             }
             dialogPane.add(contentPanel, BorderLayout.CENTER);
         }
+        writeTextField();
         contentPane.add(dialogPane, BorderLayout.CENTER);
         pack();
         setLocationRelativeTo(getOwner());
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
-    }
 
+    }
+    private void writeTextField(){
+        //向文本框写入设置数据
+        String str= FileContentReader.read("E:\\GitHub\\downloaderK\\1120191562\\Downloader\\downloader\\src\\setting\\settings.txt",1);
+        System.out.println(str);
+       savePathTextArea.setText(str);
+        str= FileContentReader.read("E:\\GitHub\\downloaderK\\1120191562\\Downloader\\downloader\\src\\setting\\settings.txt",2);
+       threadNumTextField.setText(str);
+
+    }
     private void fileNameButtonMouseDragged(MouseEvent e) {
     }
 
@@ -230,7 +236,7 @@ public class MainUI extends JFrame {
     private JPanel panel7;
     private JPanel panel8;
     private JLabel label2;
-    private JTextField textField2;
+    private JTextField threadNumTextField;
     private JPanel panel9;
     private JPanel panel12;
     private JPanel panel13;

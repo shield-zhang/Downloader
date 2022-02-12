@@ -3,6 +3,7 @@ import downloadUI.main.MainUI;
 import downloadUtil.IfLegal;
 import downloadUtil.UrlReader;
 
+import javax.swing.*;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -11,6 +12,7 @@ public class Main {
 
         MainUI mainUI=new MainUI();
         mainUI.setVisible(true);
+//        JOptionPane.showMessageDialog(null, "普通对话框");
 //        Scanner scanner = new Scanner(System.in);
 //        String url;
 //        String savePath;

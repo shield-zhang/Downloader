@@ -4,7 +4,13 @@
 
 package downloadUI.urlsDownload;
 
+import downloadCore.DownloadControl;
+import downloadUtil.FileContentReader;
+import downloadUtil.IfLegal;
+import downloadUtil.UrlReader;
+
 import java.awt.*;
+import java.awt.event.*;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.border.*;
@@ -17,12 +23,45 @@ public class UrlsDownloadUI extends JFrame {
         initComponents();
     }
 
+    private void okButtonMouseClicked(MouseEvent e) {
+        // TODO add your code here
+
+        boolean flag=false;
+        UrlReader urlReader=new UrlReader();
+        urlReader.getFromVariableUrls(urlsTextArea.getText());
+        String[] urls=urlReader.getUrlArray();
+        if (IfLegal.ifLegalUrls(urls)){
+            label1.setText("正在下载！！！");
+            DownloadControl downloadControl = new DownloadControl();
+
+            flag= downloadControl.urlsRun(urls, FileContentReader.read("E:\\GitHub\\downloaderK\\1120191562\\Downloader\\downloader\\src\\setting\\settings.txt",1),Integer.parseInt(FileContentReader.read("E:\\GitHub\\downloaderK\\1120191562\\Downloader\\downloader\\src\\setting\\settings.txt",2)));
+            if (flag){
+                JOptionPane.showMessageDialog(null, "下载完成");
+                label1.setText("没有下载任务");
+            }
+        }else {
+            JOptionPane.showMessageDialog(null,"存在非法链接，请重新输入！");
+        }
+
+
+
+
+}
+
+private void cancelButtonMouseClicked(MouseEvent e) {
+    // TODO add your code here
+    this.setVisible(false);
+}
+
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         ResourceBundle bundle = ResourceBundle.getBundle("downloadUI.main.main");
         dialogPane = new JPanel();
         contentPanel = new JPanel();
+        scrollPane1 = new JScrollPane();
+        urlsTextArea = new JTextArea();
         buttonBar = new JPanel();
+        label1 = new JLabel();
         okButton = new JButton();
         cancelButton = new JButton();
 
@@ -38,6 +77,12 @@ public class UrlsDownloadUI extends JFrame {
             //======== contentPanel ========
             {
                 contentPanel.setLayout(new GridLayout());
+
+                //======== scrollPane1 ========
+                {
+                    scrollPane1.setViewportView(urlsTextArea);
+                }
+                contentPanel.add(scrollPane1);
             }
             dialogPane.add(contentPanel, BorderLayout.CENTER);
 
@@ -48,14 +93,32 @@ public class UrlsDownloadUI extends JFrame {
                 ((GridBagLayout)buttonBar.getLayout()).columnWidths = new int[] {0, 85, 80};
                 ((GridBagLayout)buttonBar.getLayout()).columnWeights = new double[] {1.0, 0.0, 0.0};
 
+                //---- label1 ----
+                label1.setText(bundle.getString("UrlsDownloadUI.label1.text"));
+                buttonBar.add(label1, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+                    new Insets(0, 0, 0, 5), 0, 0));
+
                 //---- okButton ----
                 okButton.setText(bundle.getString("UrlsDownloadUI.okButton.text"));
+                okButton.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        okButtonMouseClicked(e);
+                    }
+                });
                 buttonBar.add(okButton, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
                     GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                     new Insets(0, 0, 0, 5), 0, 0));
 
                 //---- cancelButton ----
                 cancelButton.setText(bundle.getString("UrlsDownloadUI.cancelButton.text"));
+                cancelButton.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        cancelButtonMouseClicked(e);
+                    }
+                });
                 buttonBar.add(cancelButton, new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0,
                     GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                     new Insets(0, 0, 0, 0), 0, 0));
@@ -71,7 +134,10 @@ public class UrlsDownloadUI extends JFrame {
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
     private JPanel dialogPane;
     private JPanel contentPanel;
+    private JScrollPane scrollPane1;
+    private JTextArea urlsTextArea;
     private JPanel buttonBar;
+    private JLabel label1;
     private JButton okButton;
     private JButton cancelButton;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
