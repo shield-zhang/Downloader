@@ -1,0 +1,123 @@
+JFDML JFormDesigner: "7.0.5.3.411" Java: "11.0.13" encoding: "UTF-8"
+
+new FormModel {
+	"i18n.autoExternalize": true
+	"i18n.bundlePackage": "downloadUI.main"
+	"i18n.bundleName": "main"
+	"i18n.keyPrefix": "MainUI"
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+			name: "this"
+			add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
+				name: "dialogPane"
+				"border": new javax.swing.border.EmptyBorder( 12, 12, 12, 12 )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridLayout ) {
+					"columns": 1
+					"rows": 3
+				} ) {
+					name: "contentPanel"
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridLayout ) {
+						"columns": 1
+						"rows": 2
+					} ) {
+						name: "panel1"
+						add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridLayout ) {
+							"columns": 7
+						} ) {
+							name: "panel3"
+							add( new FormComponent( "javax.swing.JButton" ) {
+								name: "urlsButton"
+								"text": new FormMessage( null, "MainUI.urlsButton.text" )
+								addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseClicked", "urlsButtonMouseClicked", true ) )
+								addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseClicked", "urlsButtonMouseClicked", true ) )
+							} )
+							add( new FormComponent( "javax.swing.JButton" ) {
+								name: "fileNameButton"
+								"text": new FormMessage( null, "MainUI.fileNameButton.text" )
+								addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseClicked", "fileNameButtonMouseClicked", true ) )
+								addEvent( new FormEvent( "java.awt.event.MouseMotionListener", "mouseDragged", "fileNameButtonMouseDragged", true ) )
+							} )
+							add( new FormComponent( "javax.swing.JButton" ) {
+								name: "regexUrlButton"
+								"text": new FormMessage( null, "MainUI.regexUrlButton.text" )
+								addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseClicked", "regexUrlButtonMouseClicked", true ) )
+							} )
+						} )
+					} )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridLayout ) {
+						"columns": 1
+						"rows": 2
+					} ) {
+						name: "panel4"
+						add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridLayout ) {
+							"columns": 1
+						} ) {
+							name: "panel7"
+						} )
+						add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridLayout ) {
+							"columns": 2
+						} ) {
+							name: "panel8"
+							add( new FormComponent( "javax.swing.JLabel" ) {
+								name: "label2"
+								"text": new FormMessage( null, "MainUI.label2.text" )
+							} )
+							add( new FormComponent( "javax.swing.JTextField" ) {
+								name: "textField2"
+								"text": new FormMessage( null, "MainUI.textField2.text" )
+							} )
+						} )
+					} )
+					add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridLayout ) {
+						"columns": 1
+						"rows": 2
+					} ) {
+						name: "panel9"
+						add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridLayout ) {
+							"columns": 1
+						} ) {
+							name: "panel12"
+							add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridLayout ) {
+								"columns": 2
+							} ) {
+								name: "panel13"
+								add( new FormComponent( "javax.swing.JLabel" ) {
+									name: "label1"
+									"text": new FormMessage( null, "MainUI.label1.text" )
+								} )
+								add( new FormComponent( "javax.swing.JTextArea" ) {
+									name: "savePathTextArea"
+									"preferredSize": new java.awt.Dimension( 3, 15 )
+									"text": new FormMessage( null, "MainUI.savePathTextArea.text" )
+								} )
+							} )
+						} )
+						add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridLayout ) {
+							"columns": 2
+						} ) {
+							name: "panel10"
+							add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.GridLayout ) {
+								"columns": 1
+							} ) {
+								name: "panel11"
+							} )
+							add( new FormComponent( "javax.swing.JButton" ) {
+								name: "saveSettingsButton"
+								"text": new FormMessage( null, "MainUI.saveSettingsButton.text" )
+								addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseClicked", "saveSettingsButtonMouseClicked", true ) )
+							} )
+						} )
+					} )
+				}, new FormLayoutConstraints( class java.lang.String ) {
+					"value": "Center"
+				} )
+			}, new FormLayoutConstraints( class java.lang.String ) {
+				"value": "Center"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 655, 390 )
+		} )
+	}
+}
